@@ -6,16 +6,6 @@ public class CandleController : MonoBehaviour
 {
     [SerializeField] private GameObject _fire;
     
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
     public IEnumerator Glow(float time)
     {

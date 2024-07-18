@@ -23,7 +23,7 @@ public class CombinationController : MonoBehaviour
     }
     private void OnDisable()
     {
-        
+        ClearListenersOfButton();
     }
     // Start is called before the first frame update
     void Start()
@@ -40,15 +40,22 @@ public class CombinationController : MonoBehaviour
     {
         for (int i = 0; i <= _candles.Count-1; i++)
         {
-            Debug.Log(i);
             int index = i;
             _candles[i].GetComponent<Button>().onClick.AddListener(delegate { ReciveInput(index); });
             
         }
     }
+    private void ClearListenersOfButton()
+    {
+        for (int i = 0; i <= _candles.Count - 1; i++)
+        {
+            
+            _candles[i].GetComponent<Button>().onClick.RemoveAllListeners();
+
+        }
+    }
     private void ReciveInput(int index)
     {
-        Debug.Log("Hello");
         _playerInput.Add(index);
         CheckPlayerInput();
     }
