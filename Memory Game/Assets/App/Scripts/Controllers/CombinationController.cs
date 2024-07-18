@@ -2,6 +2,7 @@ using NaughtyAttributes;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CombinationController : MonoBehaviour
 {
@@ -16,7 +17,14 @@ public class CombinationController : MonoBehaviour
 
     private int _currentCombinationLength;
 
-
+    private void OnEnable()
+    {
+        RegisterButtonEvents();
+    }
+    private void OnDisable()
+    {
+        
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -28,9 +36,25 @@ public class CombinationController : MonoBehaviour
     {
         
     }
+    private void RegisterButtonEvents()//registering to every button an event which help to recive pressed candle's index;
+    {
+        for (int i = 0; i <= _candles.Count-1; i++)
+        {
+            Debug.Log(i);
+            int index = i;
+            _candles[i].GetComponent<Button>().onClick.AddListener(delegate { ReciveInput(index); });
+            
+        }
+    }
+    private void ReciveInput(int index)
+    {
+        Debug.Log("Hello");
+        _playerInput.Add(index);
+        CheckPlayerInput();
+    }
 
     [Button]
-    private void GenerateCombination()
+    private void GenerateCombination()// Random Generation of Combination;
     {
         _currentCombination.Clear();
         for (int i = 0; i < _currentCombinationLength; i++)
@@ -43,6 +67,7 @@ public class CombinationController : MonoBehaviour
     [Button]
     private void ShowCombination()
     {
+        ButtonInteraction(false);
         StartCoroutine(Show());
     }
     private IEnumerator Show()
@@ -51,6 +76,26 @@ public class CombinationController : MonoBehaviour
         {
            yield return StartCoroutine( _candles[item].GetComponent<CandleController>().Glow(1f));
            
+        }
+        ButtonInteraction(true);    
+    }
+    private void ButtonInteraction(bool canInteract)// On/off button interaction
+    {
+        foreach (GameObject candle in _candles)
+        {
+            candle.GetComponent<Button>().interactable = canInteract;
+        }
+    }
+
+    private void CheckPlayerInput()
+    {
+        for (int i = 0; i <= _playerInput.Count-1; i++)
+        {
+            if (!_currentCombination[i].Equals(_playerInput[i]))
+            {
+                Debug.Log("False");
+                break;
+            }
         }
     }
 }
