@@ -17,6 +17,12 @@ public class CombinationController : MonoBehaviour
 
     private int _currentCombinationLength;
 
+    private float _timeBetweenElements;
+
+    private int _currentCombinationIndex;
+
+
+    private int _gameModeIndex;
     private void OnEnable()
     {
         RegisterButtonEvents();
@@ -25,17 +31,16 @@ public class CombinationController : MonoBehaviour
     {
         ClearListenersOfButton();
     }
-    // Start is called before the first frame update
+    private void Awake()
+    {
+        ApplyGameModeSettings();
+    }
     void Start()
     {
         _currentCombinationLength = _defaultCombnationLength;
+        GenerateCombination();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
     private void RegisterButtonEvents()//registering to every button an event which help to recive pressed candle's index;
     {
         for (int i = 0; i <= _candles.Count-1; i++)
@@ -47,28 +52,32 @@ public class CombinationController : MonoBehaviour
     }
     private void ClearListenersOfButton()
     {
-        for (int i = 0; i <= _candles.Count - 1; i++)
+        foreach (GameObject candle in _candles)
         {
             
-            _candles[i].GetComponent<Button>().onClick.RemoveAllListeners();
+            candle.GetComponent<Button>().onClick.RemoveAllListeners(); 
 
         }
     }
     private void ReciveInput(int index)
     {
+        //add click anim
         _playerInput.Add(index);
-        CheckPlayerInput();
+        ClickCandle(index);
+        CheckPlayerInput(_playerInput.Count-1);
     }
 
     [Button]
     private void GenerateCombination()// Random Generation of Combination;
     {
+        _playerInput.Clear();
         _currentCombination.Clear();
         for (int i = 0; i < _currentCombinationLength; i++)
         {
             _currentCombination.Add(Random.Range(0,_candles.Count));
         }
         _currentCombinationLength++;
+        ShowCombination();
     }
 
     [Button]
@@ -79,9 +88,16 @@ public class CombinationController : MonoBehaviour
     }
     private IEnumerator Show()
     {
+        if (_gameModeIndex.Equals(1))
+        {
+        StartCoroutine(StartBlackOut());
+
+        }
+
+        yield return new WaitForSeconds(0.5f);
         foreach (var item in _currentCombination)
         {
-           yield return StartCoroutine( _candles[item].GetComponent<CandleController>().Glow(1f));
+           yield return StartCoroutine( _candles[item].GetComponentInChildren<CandleController>().Glow(_timeBetweenElements));
            
         }
         ButtonInteraction(true);    
@@ -94,15 +110,78 @@ public class CombinationController : MonoBehaviour
         }
     }
 
-    private void CheckPlayerInput()
+    private void CheckPlayerInput(int index)
     {
-        for (int i = 0; i <= _playerInput.Count-1; i++)
+        if (index < 0)
         {
-            if (!_currentCombination[i].Equals(_playerInput[i]))
-            {
-                Debug.Log("False");
-                break;
-            }
+            Debug.Log("Unexpected Error");
+            return;
         }
+        if (!_playerInput[index].Equals(_currentCombination[index]))
+        {
+            Debug.Log("WRONG");
+            UIEvents.RiseOnGameOverEvent();
+            //activate game over panel;
+        }
+        else
+        {
+            if (_playerInput.Count.Equals(_currentCombination.Count))
+            {
+                //cleaning input for new batch and re-starting combination;
+                GenerateCombination();
+            }
+            
+        }
+
+    }
+    private void ApplyGameModeSettings() 
+    {
+        switch ((DifficultyLevel)GameManager.Instance.DifficultyLevel)
+        {
+            case DifficultyLevel.EASY:
+                _timeBetweenElements = 1.5f;
+                break;
+
+            case DifficultyLevel.NORMAL:
+                _timeBetweenElements = 1f;
+             break;
+
+            case DifficultyLevel.HARD:
+                _timeBetweenElements = 0.5f;
+            break;
+
+            default:
+                _timeBetweenElements = 1f;
+                break;
+        }
+
+        Debug.Log((DifficultyLevel)GameManager.Instance.DifficultyLevel);
+        switch ((GameMode)GameManager.Instance.GameMode)
+        {
+            case GameMode.CLASSIC:
+                _gameModeIndex = 0;
+                break;
+
+            case GameMode.BLACKOUT:
+                //start blackout
+                _gameModeIndex = 1;
+                break;
+
+            default:
+                _gameModeIndex = 0;
+                break;
+        }
+        Debug.Log((GameMode)GameManager.Instance.GameMode);
+    }
+
+    private void ClickCandle(int index)
+    {
+        StartCoroutine(_candles[index].GetComponentInChildren<CandleController>().Glow(_timeBetweenElements/2));
+    }
+    private IEnumerator StartBlackOut()
+    {
+        GameEvents.RiseOnBlackOutStartedEvent();
+        yield return new WaitForEndOfFrame();
+
     }
 }

@@ -7,6 +7,9 @@ public static class UIEvents
     public delegate void OnMenu();
     public static event OnMenu OnModeSelectMenuEvent , OnMainMenuEvent, OnSettingsMenuEvent;
 
+    public delegate void OnGameOver();
+    public static event OnGameOver OnGameOverEvent;
+
 
     public static void RiseOnMainMenuEvent()
     {
@@ -16,8 +19,12 @@ public static class UIEvents
     {
         OnModeSelectMenuEvent?.Invoke();
     }
-    public static void RiseSettingsMenuEvent()
+    public static void RiseOnSettingsMenuEvent()
     {
         OnSettingsMenuEvent?.Invoke();
+    }
+    public static void RiseOnGameOverEvent()
+    {
+        OnGameOverEvent?.Invoke();
     }
 }

@@ -10,6 +10,8 @@ public class ModeSelectionMenuController : MonoBehaviour
 
     private DifficultyLevel _difficultyLevel;
 
+    private GameMode _gameMode;
+
     private void OnEnable()
     {
         UIEvents.OnModeSelectMenuEvent += OnModeSelectMenuEventHandler;
@@ -28,8 +30,13 @@ public class ModeSelectionMenuController : MonoBehaviour
     {
         _difficultyLevel = (DifficultyLevel)level;
     }
+    public void ChangeGameMode(int gamemode)
+    {
+        _gameMode = (GameMode)gamemode;
+    }
     public void StartGame()
     {
+        GameManager.Instance.SetGameSettings(_view.DifficultyDropdown.value,_view.GameModeDropdown.value);
         SceneManager.LoadScene(1);
     }
     public void ReturnToMainMenu()
